@@ -1,3 +1,65 @@
+<?php
+    $value = filter_input(type: INPUT_POST, var_name: 'value');
+    $from = filter_input(type: INPUT_POST, var_name: 'from');
+    $to = filter_input(type: INPUT_POST, var_name: 'to');
+    $result = null;
+    switch ($from) {
+        case 'mg':
+            $equivalent = [
+                'mg' => 1,
+                'g' => 1000,
+                'kg' => 1e+6,
+                'oz' => 28350,
+                'lb' => 453600,
+            ];
+            $result = $value / $equivalent[$to];
+            break;
+
+        case 'g':
+            $equivalent = [
+                'mg' => 1000,
+                'g' => 1,
+                'kg' => 1000,
+                'oz' => 28.35,
+                'lb' => 453.6,
+            ];
+            $result = ($to == 'mg') ? $value * $equivalent[$to] : $value / $equivalent[$to];
+            break;
+
+        case 'kg':
+            $equivalent = [
+                'mg' => 1e+6,
+                'g' => 1000,
+                'kg' => 1,
+                'oz' => 35.274,
+                'lb' => 2.205,
+            ];
+            $result = (in_array($to, ['mg', 'g', 'oz', 'lb'])) ? $value * $equivalent[$to] : $value / $equivalent[$to];
+            break;
+
+        case 'oz':
+            $equivalent = [
+                'mg' => 28350,
+                'g' => 28.35,
+                'kg' => 35.274,
+                'oz' => 1,
+                'lb' => 16,
+            ];
+            $result = (in_array($to, ['mg', 'g'])) ? $value * $equivalent[$to] : $value / $equivalent;
+            break;
+
+        case 'lb':
+            $equivalent = [
+                'mg' => 453600,
+                'g' => 453.6,
+                'kg' => 2.205,
+                'oz' => 16,
+                'lb' => 1,
+            ];
+            $result = (in_array($to, ['mg', 'g', 'oz'])) ? $value * $equivalent[$to] : $value / $equivalent;
+            break;
+    }
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -24,42 +86,46 @@
             </ul>
         </div>
 
-        <div>
-            <form action="weight.php" method="post">
-                <div class="my-4">
-                    <label for="weight" class="block mb-2 text-sm font-medium text-gray-900">Enter the weight to convert</label>
-                    <input type="text" id="weight" name="weight" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
-                </div>
+        <?php if ($result) : ?>
+            <h2 class="text-xl font-semibold block my-4">Result of your calculation</h2>
+            <span class="block text-2xl font-bold my-4"><?= sprintf("%d %s = %f %s", $value, $from, $result, $to); ?></span>
+            <a href="weight.php" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Reset</a>
+        <?php else: ?>
+            <div>
+                <form action="weight.php" method="post">
+                    <div class="my-4">
+                        <label for="value" class="block mb-2 text-sm font-medium text-gray-900">Enter the weight to convert</label>
+                        <input type="text" id="value" name="value" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
+                    </div>
 
-                <div class="my-4">
-                    <label for="from" class="block mb-2 text-sm font-medium text-gray-900">Unit to convert from</label>
-                    <select id="from" name="from" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required>
-                        <option selected></option>
-                        <option value="mg">milligram</option>
-                        <option value="g">gram</option>
-                        <option value="kg">kilogram</option>
-                        <option value="km">kilometer</option>
-                        <option value="oz">ounce</option>
-                        <option value="lb">pound</option>
-                    </select>
-                </div>
+                    <div class="my-4">
+                        <label for="from" class="block mb-2 text-sm font-medium text-gray-900">Unit to convert from</label>
+                        <select id="from" name="from" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required>
+                            <option selected></option>
+                            <option value="mg">milligram</option>
+                            <option value="g">gram</option>
+                            <option value="kg">kilogram</option>
+                            <option value="oz">ounce</option>
+                            <option value="lb">pound</option>
+                        </select>
+                    </div>
 
-                <div class="my-4">
-                    <label for="to" class="block mb-2 text-sm font-medium text-gray-900">Unit to convert to</label>
-                    <select id="to" name="to" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required>
-                        <option selected></option>
-                        <option value="mg">milligram</option>
-                        <option value="g">gram</option>
-                        <option value="kg">kilogram</option>
-                        <option value="km">kilometer</option>
-                        <option value="oz">ounce</option>
-                        <option value="lb">pound</option>
-                    </select>
-                </div>
+                    <div class="my-4">
+                        <label for="to" class="block mb-2 text-sm font-medium text-gray-900">Unit to convert to</label>
+                        <select id="to" name="to" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required>
+                            <option selected></option>
+                            <option value="mg">milligram</option>
+                            <option value="g">gram</option>
+                            <option value="kg">kilogram</option>
+                            <option value="oz">ounce</option>
+                            <option value="lb">pound</option>
+                        </select>
+                    </div>
 
-                <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Convert</button>
-            </form>
-        </div>
+                    <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Convert</button>
+                </form>
+            </div>
+        <?php endif ?>
     </div>
 </body>
 </html>
